@@ -9,6 +9,7 @@ var App = require('./App');
 var Home = require('./Home');
 var Login = require('./Login');
 var Register = require('./Register');
+var Tracker = require('./Tracker');
 var NotFound = require('./NotFound');
 
 var routes = (
@@ -16,6 +17,7 @@ var routes = (
     <DefaultRoute handler={Home} />
     <Route name="login" handler={Login} />
     <Route name="register" handler={Register} />
+    <Route name="tracker" handler={Tracker} />
     <NotFoundRoute handler={NotFound} />
   </Route>
 );
