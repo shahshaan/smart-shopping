@@ -8,20 +8,21 @@ var Tracker = React.createClass({
     todaysDate = (todaysDateInstance.getMonth() + 1).toString() + '/' + todaysDateInstance.getDate().toString() + '/' + todaysDateInstance.getFullYear().toString();
     return {
       dateClicked: todaysDate,
+      name: '',
+      value: ''
     };
   },
-  handleClick: function() {
-    console.log('calendar clicked');
-    var dateClicked = document.getElementById('rw_1_view_selected_item').innerHTML;
+  handleChange: function(dateObject) {
+    console.log('onChange is calling this');
+    var dateClicked = (dateObject.getMonth() + 1).toString() + '/' + dateObject.getDate().toString() + '/' + dateObject.getFullYear().toString();
     this.setState({dateClicked: dateClicked});
-
   },
   render: function() {
-    var activeDate = this.state.dateClicked;
+    var dateClicked = this.state.dateClicked;
     return (
       <div>
-        <Calendar defaultValue={new Date()} footer={true} onClick={this.handleClick} />
-        <div>Date selected: {activeDate}</div>
+        <Calendar defaultValue={new Date()} footer={true} onChange={this.handleChange} />
+        <div>Date selected: {dateClicked}</div>
       </div>
     );
   }
