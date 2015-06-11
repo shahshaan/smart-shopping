@@ -31,7 +31,7 @@ var App = Eventful.createClass({
     });
   },
 
-  addItem: function(item) {
+  addItem: function(item, location) {
     $.post(url.addItem, item)
     .done(function(data) {
       this.getList();
