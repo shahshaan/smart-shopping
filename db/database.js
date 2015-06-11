@@ -9,6 +9,12 @@ module.exports = {
       frequency: Number,
       coupons: [String],
       food_category: String,
+      sales: {
+        market: String,
+        regPrice: String,
+        salePrice: String,
+        saleDates: String
+      },
       expiration: Date
     }
   }),
