@@ -1,33 +1,36 @@
 var React = require('react');
 var Eventful = require('eventful-react');
-var Calendar = require('react-widgets').Calendar
+var CalendarComponent = require('react-widgets').Calendar
+var Calendar = require('./Calendar.jsx');
+
 
 var Tracker = React.createClass({
-  getInitialState : function() {
+
+  getInitialState: function() {
     var todaysDateInstance = new Date();
-    todaysDate = (todaysDateInstance.getMonth() + 1).toString() + '/' + todaysDateInstance.getDate().toString() + '/' + todaysDateInstance.getFullYear().toString();
+    var todaysDate = (todaysDateInstance.getMonth() + 1).toString() + '/' + todaysDateInstance.getDate().toString() + '/' + todaysDateInstance.getFullYear().toString();
     return {
       dateClicked: todaysDate,
-      name: '',
-      value: ''
     };
   },
-  handleChange: function(dateObject) {
-    console.log('onChange is calling this');
-    var dateClicked = (dateObject.getMonth() + 1).toString() + '/' + dateObject.getDate().toString() + '/' + dateObject.getFullYear().toString();
-    // var dateClicked = dateObject.toString;
-    this.setState({dateClicked: dateClicked});
+  componentDidMount: function() {
+    this.on('dateClicked', function(data) {
+      var dateInstance = data.dateInstance
+      var dateClicked = (dateInstance.getMonth() + 1).toString() + '/' + dateInstance.getDate().toString() + '/' + dateInstance.getFullYear().toString();
+      this.setState({
+        dateClicked: dateClicked
+      })
+    });
   },
   render: function() {
-    var dateClicked = this.state.dateClicked;
     return (
       <div class="row" id="tracker">
         <h1>Shopping Tracker</h1>
         <div className="col-md-6">
-          <Calendar defaultValue={new Date()} footer={true} onChange={this.handleChange} />
+          <Calendar dateClicked={this.state.dateClicked} />
         </div>
         <div className="col-md-6 single-day">
-          <div><h2>{dateClicked}</h2></div>
+          <div><h2>{this.state.dateClicked}</h2></div>
           <div className="logged-message">
             <div className="logged-message-title">
               Chris #shopped
@@ -43,6 +46,3 @@ var Tracker = React.createClass({
 });
 
 module.exports = Tracker;
-
-
-// <Calendar footer={true}/>, mountNode);

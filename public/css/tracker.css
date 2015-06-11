@@ -9,3 +9,8 @@
 .logged-message-title {
   font-size: 40px;
 }
+
+#event {
+ border-radius: 8px;
+ background: green;
+}
