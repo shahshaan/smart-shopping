@@ -1,0 +1,16 @@
+#tracker h1, #tracker h2 {
+  text-align: center;
+}
+
+.logged-message {
+  font-size: 28px;
+}
+
+.logged-message-title {
+  font-size: 40px;
+}
+
+#event {
+ border-radius: 8px;
+ background: green;
+}
