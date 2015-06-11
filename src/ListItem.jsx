@@ -57,10 +57,10 @@ var ListItem = Eventful.createClass({
     }
     if (this.props.sales) {
       var salesDivs = [
-        <div className="market-name">{this.props.sales.market}</div>,
-        <div className="sale-price">{this.props.sales.salePrice}</div>,
-        <div className="reg-price">{this.props.sales.regPrice}</div>,
-        <div className="sale-dates">{this.props.sales.saleDates}</div>
+        <div className="sales market-name">{this.props.sales.market}</div>,
+        <div className="sales sale-price">{this.props.sales.salePrice}</div>,
+        <div className="sales reg-price">{this.props.sales.regPrice}</div>,
+        <div className="sales sale-dates">{this.props.sales.saleDates}</div>
       ]
     }
 

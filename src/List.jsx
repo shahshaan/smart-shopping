@@ -7,8 +7,8 @@ var List = Eventful.createClass({
     e.preventDefault();
     var newItemName = e.target.newItemInput.value;
     e.target.newItemInput.value = '';
-
-    this.emit('add-item', { name: newItemName });
+    var loc = e.target.newLocInput.value;
+    this.emit('add-item', {name: newItemName, loc: loc});
   },
   renderListItem: function(itemData, id) {
     return (
@@ -30,6 +30,7 @@ var List = Eventful.createClass({
                   <div className='new-item-input'>
                     <form name="new-item-form" onSubmit={this.addItem}>
                       <input className='new-item-input' type="text" ref="newItemInput" name="newItemInput" placeholder="Enter an item"/>
+                      <input className='new-item-input' type="text" ref="newLocInput" name="newLocInput" placeholder="Berkeley, CA"/>
                       <input className='btn btn-sm btn-primary add-item-button' type="submit" value="Add Item"/>
                     </form>
                 </div>

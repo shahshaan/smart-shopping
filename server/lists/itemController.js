@@ -29,12 +29,12 @@ module.exports = {
       name: name,
       data: {
         frequency: req.body.frequency,
-
         coupons: ['none'],
         expiration: new Date(2015,8,16)
       }
     });
-    var location = req.body.loc || 'CABerkeley';
+    var location = req.body.loc.toLowerCase();
+    location = location.slice(-2) + location.slice(0, location.length - 4);
     var salesObject = {};
 
     var findItem = Q.nbind(Item.findOne, Item);
@@ -71,7 +71,7 @@ module.exports = {
             if (!error) {
               var $ = cheerio.load(html);
               $('optgroup').each(function(index, opt){
-                if (opt.attribs.label === location) {
+                if (opt.attribs.label.toLowerCase() === location) {
                   var matchedLocations = $(this).find('option');
                   for (var i = 0; i < matchedLocations.length; i++) {
                     results.push(matchedLocations[i].attribs.value);
