@@ -26,7 +26,7 @@ var storeOrderedList = function(username, list, cb) {
         if (err) console.error(err);
         var orderedList = orderList(user.list);
         User.update({username: username}, {'list': orderedList}, {upsert: true}, function(err) {
-          if (err) { 
+          if (err) {
             console.error(err);
             cb(false);
           }
@@ -64,6 +64,7 @@ module.exports = {
     .findOne({username: username})
     .populate('list')
     .exec(function(err, user) {
+      console.log(user);
       if (err) console.error(err);
       console.log('in get list, user:',user);
       res.send(user.list);
@@ -73,16 +74,16 @@ module.exports = {
   addItemToList: function(req, res) {
     var username = req.uid;
     var name = req.smartShoppingData.name;
- 
+
     User.findOneAndUpdate(
-      {username: username}, 
-      {$push: {'list': req.smartShoppingData._id}}, 
-      {upsert: true}, 
+      {username: username},
+      {$push: {'list': req.smartShoppingData._id}},
+      {upsert: true},
       function(err, user) {
         if (err) {
           console.error(err);
           res.status(500).send({ error: 'Server Error'});
-        } 
+        }
         storeOrderedList(username, user.list, function(complete) {
           if (complete) {
             res.send(user.list);
@@ -90,7 +91,7 @@ module.exports = {
             res.status(500).send({error: 'Could not order list!'});
           }
         });
-      }); 
+      });
   },
 
   addItemToArchive: function(req, res) {
@@ -103,20 +104,20 @@ module.exports = {
       pushModifier.$push['past_items'] = user.list[index];
       User.update({username: username}, pushModifier, {upsert: true}, function(err) {if (err) console.error(err)});
     });
-    
+
     var setModifier = { $set: {} };
     setModifier.$set['list.' + index] = null;
     User.update({username: username}, setModifier, {upsert: true}, function(err) {
       if (err) {
         console.error(err);
         res.status(500).send({error: 'Server Error'});
-      } 
+      }
     });
 
     User.findOneAndUpdate({username: username}, {$pull: {'list': null}}, {upsert: true}, function(err, user) {
       if (err) {
         console.error(err);
-        res.status(500).send({error: 'Server Error'});        
+        res.status(500).send({error: 'Server Error'});
       }
       storeOrderedList(username, user.list, function(complete) {
         if (complete) {
@@ -139,7 +140,7 @@ module.exports = {
       if (err) {
         console.error(err);
         res.status(500).send({error: 'Server Error'});
-      } 
+      }
       storeOrderedList(username, user.list, function(complete) {
         if (complete) {
           res.send(user.list);
@@ -147,26 +148,26 @@ module.exports = {
           res.status(500).send({error: 'Couldn\'t sort list!'});
         }
       });
-    }); 
+    });
   },
 
   deleteItemFromList: function(req, res) {
     var username = req.uid;
     var index = req.body.index;
-    
+
     var setModifier = {$set: {}};
     setModifier.$set['list.' + index] = null;
     User.update({username: username}, setModifier, {upsert: true}, function(err) {
       if (err) {
         console.error(err);
         res.status(500).send({error: 'Server Error'});
-      } 
+      }
     });
 
     User.findOneAndUpdate({username: username}, {$pull: {'list': null}}, {upsert: true}, function(err, user) {
       if (err) {
         console.error(err);
-        res.status(500).send({error: 'Server Error'});        
+        res.status(500).send({error: 'Server Error'});
       }
       storeOrderedList(username, user.list, function(complete) {
         if (complete) {
