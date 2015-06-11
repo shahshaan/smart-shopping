@@ -12,15 +12,19 @@ var Tracker = Eventful.createClass({
 
     // firebase/groupme
     var groupMeGroupId = window.GROUP_ME_GROUP_ID_BE_ACTIVE;
-    var firebaseUrl = window.FIREBASE_DB_ROOT + '/' + groupMeGroupId;
-    console.log(firebaseUrl);
+    var firebaseUrl = window.FIREBASE_DB_ROOT + '/groupme-id-' + groupMeGroupId;
+    var groupMeApiUrl = 'https://api.groupme.com/v3/groups/' + groupMeGroupId;
+    var groupMeMessagesApiUrl = groupMeApiUrl + '/messages';
     var firebaseRef = new Firebase(firebaseUrl);
     return {
       dateClicked: todaysDate,
       groupMeToken: window.GROUP_ME_TOKEN_SHAAN,
       firebaseRef: firebaseRef,
       groupMeGroupId: groupMeGroupId,
-      groupMeEventHashtags: window.GROUP_ME_BE_ACTIVE_EVENT_HASHTAGS
+      groupMeEventHashtags: window.GROUP_ME_BE_ACTIVE_EVENT_HASHTAGS,
+      groupMeApiUrl: groupMeApiUrl,
+      groupMeMessagesApiUrl: groupMeMessagesApiUrl,
+      groupMeToken: window.GROUP_ME_TOKEN_SHAAN
     };
   },
   componentDidMount: function() {
@@ -35,15 +39,89 @@ var Tracker = Eventful.createClass({
   },
 
   isNewestMessageIdInFirebase: function() {
+    var addMessagesFromGroupMeToFirebase = this.addMessagesFromGroupMeToFirebase;
+    var setFirstMessageIdAsFirstGroupMeMessageId = this.setFirstMessageIdAsFirstGroupMeMessageId;
+
     this.state.firebaseRef.child('newest_message_id').once("value", 
       function(snapshot) {
         var newest_message_id = snapshot.val();
         console.log('newest_message_id: ', newest_message_id)
+        if (newest_message_id) {
+          addMessagesFromGroupMeToFirebase();
+        } else {
+          setFirstMessageIdAsFirstGroupMeMessageId();
+        };
       }, 
       function (errorObject) {
         console.log("The read failed: " + errorObject.code);
       }
     );
+  },
+
+  addMessagesFromGroupMeToFirebase: function() {
+    console.log('going to addMessagesFromGroupMeToFirebase here');
+  },
+
+  setFirstMessageIdAsFirstGroupMeMessageId: function() {
+    console.log('in setFirstMessageIdAsFirstGroupMeMessageId');
+
+    // testing fake message id setting
+    // var firstMessageId = '1234';
+    // firebaseRefNewestMessageId.set(firstMessageId);
+
+
+    var firebaseRefNewestMessageId = this.state.firebaseRef.child('newest_message_id');
+    var firstMessageId = '';
+    var groupMeMessagesApiUrl = this.state.groupMeMessagesApiUrl;
+    var groupMeToken = this.state.groupMeToken;
+
+    var recursiveGetMessagesBeforeId = function(lastMessageId) {
+
+      $.ajax({
+          url: groupMeMessagesApiUrl,
+          type:'get',
+          data: {
+            limit: 100,
+            before_id: lastMessageId,
+            token: groupMeToken
+          },
+          success: function(response) {
+            var messages = response.response.messages;
+            var lastMessageId = messages[messages.length - 1].id;
+            if (messages.length === 100) {
+              recursiveGetMessagesBeforeId(lastMessageId)
+            } else {
+              var firstMessageId = lastMessageId;
+              firebaseRefNewestMessageId.set(firstMessageId);
+              console.log('First GroupMe message id was set to: ', firstMessageId);
+              console.log('The first message in this GroupMe: ', messages[messages.length - 1]);
+            } 
+          },
+          error: function(xhr) {
+            console.log('Error in recursiveGetMessagesBeforeId call to GroupMe Messages: ', xhr);
+          }
+      });
+    };
+
+    $.ajax({
+        url: this.state.groupMeMessagesApiUrl,
+        type:'get',
+        data: {
+          limit: 100,
+          token: this.state.groupMeToken
+        },
+        success: function(response) {
+          var messages = response.response.messages;
+          var lastMessageId = messages[messages.length - 1].id;
+          recursiveGetMessagesBeforeId(lastMessageId);
+        },
+        error: function(xhr) {
+          console.log('Error in initial call for messages in setFirstMessageIdAsFirstGroupMeMessageId: ', xhr);
+        }
+    });
+
+
+
   },
 
   // on load
