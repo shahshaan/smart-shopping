@@ -3,6 +3,7 @@ var Eventful = require('eventful-react');
 var CalendarComponent = require('react-widgets').Calendar
 var Calendar = require('./Calendar.jsx');
 
+<<<<<<< HEAD
 
 var Tracker = Eventful.createClass({
   mixins: [ReactFireMixin],
@@ -237,7 +238,7 @@ var Tracker = Eventful.createClass({
   render: function() {
     window.dateClicked = this.state.dateClicked;
     window.events = this.state.events;
-    console.log(window.events);
+
     return (
       <div class="row" id="tracker">
         <h1>Shopping Tracker</h1>
@@ -261,3 +262,5 @@ var Tracker = Eventful.createClass({
 });
 
 module.exports = Tracker;
+
+
