@@ -5,6 +5,7 @@ var Calendar = require('./Calendar.jsx');
 
 
 var Tracker = Eventful.createClass({
+  mixins: [ReactFireMixin],
 
   getInitialState: function() {
     var todaysDateInstance = new Date();
@@ -24,10 +25,15 @@ var Tracker = Eventful.createClass({
       groupMeEventHashtags: window.GROUP_ME_BE_ACTIVE_EVENT_HASHTAGS,
       groupMeApiUrl: groupMeApiUrl,
       groupMeMessagesApiUrl: groupMeMessagesApiUrl,
-      groupMeToken: window.GROUP_ME_TOKEN_SHAAN
+      groupMeToken: window.GROUP_ME_TOKEN_SHAAN,
+      firebaseUrl: firebaseUrl
     };
   },
   componentDidMount: function() {
+
+    var ref = new Firebase(this.state.firebaseUrl + '/events');
+    this.bindAsObject(ref, "events");
+
     this.on('dateClicked', function(data) {
       var dateInstance = data.dateInstance
       var dateClicked = (dateInstance.getMonth() + 1).toString() + '/' + dateInstance.getDate().toString() + '/' + dateInstance.getFullYear().toString();
@@ -54,7 +60,7 @@ var Tracker = Eventful.createClass({
     var day = moment.unix(timeStamp).utc().format('L').split('/').join('-');
     console.log('date: ', day);
     console.log('workout to be added, ', message.text);
-    var firebaseWorkoutDay = firebaseRef.child("workouts").child(day);
+    var firebaseWorkoutDay = firebaseRef.child("events").child(day);
     firebaseWorkoutDay.push(message);
   },
 
@@ -229,6 +235,9 @@ var Tracker = Eventful.createClass({
 
 
   render: function() {
+    window.dateClicked = this.state.dateClicked;
+    window.events = this.state.events;
+    console.log(window.events);
     return (
       <div class="row" id="tracker">
         <h1>Shopping Tracker</h1>
