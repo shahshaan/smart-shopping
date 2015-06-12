@@ -86,7 +86,7 @@ module.exports = {
                         if (productName.indexOf(name) !== -1) {
                           var $priceData = $(this).find('.prices')
                           var salePrice = "Sale " + $priceData.find('.my_price').text() + $priceData.find('.sub_price').text();
-                          if (salePrice.length === 0) {
+                          if (salePrice.length === 5) {
                             salePrice = $priceData.find('.sale_line').text();
                           }
                           var regPrice = $priceData.find('.reg_line').text();
