@@ -11,8 +11,16 @@ var List = Eventful.createClass({
     this.emit('add-item', {name: newItemName, loc: loc});
   },
   renderListItem: function(itemData, id) {
+    var props = {
+      key: id,
+      index: id,
+      name: itemData.name,
+      mode: this.props.mode,
+      foodCategory: itemData.data.food_category,
+      sales: itemData.data.sales
+    }
     return (
-      <ListItem key={id} index={id} name={itemData.name} mode={this.props.mode} foodCategory={itemData.data.food_category} sales={itemData.data.sales} />
+      <ListItem {...props} />
     );
   },
   render: function() {
