@@ -2,6 +2,7 @@ var React = require('react');
 var Eventful = require('eventful-react');
 var CalendarComponent = require('react-widgets').Calendar
 var Calendar = require('./Calendar.jsx');
+var Day = require('./Day.jsx');
 
 <<<<<<< HEAD
 
@@ -13,21 +14,28 @@ var Tracker = Eventful.createClass({
     var todaysDate = (todaysDateInstance.getMonth() + 1).toString() + '/' + todaysDateInstance.getDate().toString() + '/' + todaysDateInstance.getFullYear().toString();
 
     // firebase/groupme
-    var groupMeGroupId = window.GROUP_ME_GROUP_ID_BE_ACTIVE;
+    var groupMeGroupId = window.GROUP_ME_GROUP_ID;
     var firebaseUrl = window.FIREBASE_DB_ROOT + '/groupme-id-' + groupMeGroupId;
     var groupMeApiUrl = 'https://api.groupme.com/v3/groups/' + groupMeGroupId;
     var groupMeMessagesApiUrl = groupMeApiUrl + '/messages';
     var firebaseRef = new Firebase(firebaseUrl);
     return {
       dateClicked: todaysDate,
-      groupMeToken: window.GROUP_ME_TOKEN_SHAAN,
+      groupMeToken: window.GROUP_ME_TOKEN,
       firebaseRef: firebaseRef,
       groupMeGroupId: groupMeGroupId,
-      groupMeEventHashtags: window.GROUP_ME_BE_ACTIVE_EVENT_HASHTAGS,
+      groupMeEventHashtags: window.EVENT_HASHTAGS,
       groupMeApiUrl: groupMeApiUrl,
       groupMeMessagesApiUrl: groupMeMessagesApiUrl,
+<<<<<<< HEAD
       groupMeToken: window.GROUP_ME_TOKEN_SHAAN,
       firebaseUrl: firebaseUrl
+=======
+      firebaseUrl: firebaseUrl,
+      events: {},
+      dateClicked: todaysDate,
+      eventsForDayClicked: {}
+>>>>>>> [feat] shows events for a day when a day is clicked but it does not auto update the events
     };
   },
   componentDidMount: function() {
@@ -36,22 +44,32 @@ var Tracker = Eventful.createClass({
     this.bindAsObject(ref, "events");
 
     this.on('dateClicked', function(data) {
-      var dateInstance = data.dateInstance
+      var dateInstance = data.dateInstance;
       var dateClicked = (dateInstance.getMonth() + 1).toString() + '/' + dateInstance.getDate().toString() + '/' + dateInstance.getFullYear().toString();
+      var formattedDate = moment(dateInstance).format('L').split('/').join('-');
+      var eventsForDayClicked = this.state.events[formattedDate];
+      
       this.setState({
-        dateClicked: dateClicked
-      })
+        dateClicked: dateClicked,
+        eventsForDayClicked: eventsForDayClicked
+      });
     });
+
+
 
     var addNewestMessagesFromGroupMeToFirebase = this.addNewestMessagesFromGroupMeToFirebase;
     var setFirstMessageIdAsFirstGroupMeMessageId = this.setFirstMessageIdAsFirstGroupMeMessageId;
-    this.isNewestMessageIdInFirebase(function(isNewestMessageIdInFirebase) {
-      if (isNewestMessageIdInFirebase) {
-        addNewestMessagesFromGroupMeToFirebase();
-      } else {
-        setFirstMessageIdAsFirstGroupMeMessageId();
-      };
-    });
+    var isNewestMessageIdInFirebase = this.isNewestMessageIdInFirebase;
+    var messageAdder = function() {
+      isNewestMessageIdInFirebase(function(isNewestMessageIdInFirebase) {
+        if (isNewestMessageIdInFirebase) {
+          addNewestMessagesFromGroupMeToFirebase();
+        } else {
+          setFirstMessageIdAsFirstGroupMeMessageId();
+        };
+      });
+    };
+    setInterval(messageAdder, 2000);
 
   },
 
@@ -81,6 +99,7 @@ var Tracker = Eventful.createClass({
   },
 
   isNewestMessageIdInFirebase: function(callback) {
+    console.log('calling isNewestMessageIdInFirebase');
     var addNewestMessagesFromGroupMeToFirebase = this.addNewestMessagesFromGroupMeToFirebase;
     var setFirstMessageIdAsFirstGroupMeMessageId = this.setFirstMessageIdAsFirstGroupMeMessageId;
 
@@ -175,7 +194,8 @@ var Tracker = Eventful.createClass({
     var groupMeToken = this.state.groupMeToken;
 
     var recursiveGetMessagesBeforeId = function(lastMessageId) {
-
+      console.log('in setFirstMessageIdAsFirstGroupMeMessageId groupMeMessagesApiUrl: ', groupMeMessagesApiUrl);
+      console.log('ajax call: ' + groupMeMessagesApiUrl + '?' + 'limit=100' + '&before_id=' + lastMessageId + '&token=' + groupMeToken);
       $.ajax({
           url: groupMeMessagesApiUrl,
           type:'get',
@@ -185,8 +205,13 @@ var Tracker = Eventful.createClass({
             token: groupMeToken
           },
           success: function(response) {
-            var messages = response.response.messages;
-            var lastMessageId = messages[messages.length - 1].id;
+            console.log('in setFirstMessageIdAsFirstGroupMeMessageId the response: ', response);
+            console.log('last message id in recursive: ', lastMessageId);
+            var messages = [];
+            if (response) {
+              messages = response.response.messages;
+              lastMessageId = messages[messages.length - 1].id;
+            };
             if (messages.length === 100) {
               recursiveGetMessagesBeforeId(lastMessageId)
             } else {
@@ -221,40 +246,19 @@ var Tracker = Eventful.createClass({
 
   },
 
-  // on load
-    // if there is no newest message id
-      // get it
-      // once there is a new message id
-        // call get addMessagesFromGroupMeToFirebase on an interval
-          // itereate through all the messages newer than newest message id
-            // push all new messages to messages in firebase
-            // push all messages with an event to firebase events by date
-
-  // set events to firebase events
-  // set messages to firebase messages
-
-
-
   render: function() {
     window.dateClicked = this.state.dateClicked;
     window.events = this.state.events;
 
     return (
-      <div class="row" id="tracker">
+      <div className="row" id="tracker">
         <h1>Shopping Tracker</h1>
+        <h4>{this.state.groupMeEventHashtags}</h4>
         <div className="col-md-6">
           <Calendar dateClicked={this.state.dateClicked} />
         </div>
         <div className="col-md-6 single-day">
-          <div><h2>{this.state.dateClicked}</h2></div>
-          <div className="logged-message">
-            <div className="logged-message-title">
-              Chris #shopped
-            </div>
-            <div className="logged-message-text">
-              Bought laundry detergent, pizza, Curry jersey, and some shampoo for my beard #shopped
-            </div>
-          </div>
+          <Day dateClicked={this.state.dateClicked} eventsForDayClicked={this.state.eventsForDayClicked} />
         </div>
       </div>
     );
