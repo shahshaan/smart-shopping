@@ -2,6 +2,7 @@ var React = require('react');
 var Eventful = require('eventful-react');
 var ModeToggle = require('./ModeToggle');
 var List = require('./List');
+var Tracker = require('./Tracker')
 var auth = require('./auth');
 
 var Home = Eventful.createClass({
@@ -21,10 +22,17 @@ var Home = Eventful.createClass({
   },
 
   render: function() {
+    var display;
+    if (this.props.data.mode === ModeToggle.CALENDAR) {
+      display = <Tracker />
+    } else {
+      display = <List items={this.props.data.items} mode={this.props.data.mode} />
+    }
+
     return (
       <div id="home">
         <ModeToggle mode={this.props.data.mode} />
-        <List items={this.props.data.items} mode={this.props.data.mode} />
+        {display}
       </div>
     );
   }
