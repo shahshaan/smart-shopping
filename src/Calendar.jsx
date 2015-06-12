@@ -23,7 +23,7 @@ var DayComponent = Eventful.createClass({
     var events = window.events;
     var idString = '';
 
-    if (events[curDate]) {
+    if (events[dayRendering]) {
       idString += 'event';
     };
 

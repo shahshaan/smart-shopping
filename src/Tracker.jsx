@@ -4,8 +4,6 @@ var CalendarComponent = require('react-widgets').Calendar
 var Calendar = require('./Calendar.jsx');
 var Day = require('./Day.jsx');
 
-<<<<<<< HEAD
-
 var Tracker = Eventful.createClass({
   mixins: [ReactFireMixin],
 
@@ -27,15 +25,10 @@ var Tracker = Eventful.createClass({
       groupMeEventHashtags: window.EVENT_HASHTAGS,
       groupMeApiUrl: groupMeApiUrl,
       groupMeMessagesApiUrl: groupMeMessagesApiUrl,
-<<<<<<< HEAD
-      groupMeToken: window.GROUP_ME_TOKEN_SHAAN,
-      firebaseUrl: firebaseUrl
-=======
       firebaseUrl: firebaseUrl,
       events: {},
       dateClicked: todaysDate,
       eventsForDayClicked: {}
->>>>>>> [feat] shows events for a day when a day is clicked but it does not auto update the events
     };
   },
   componentDidMount: function() {
