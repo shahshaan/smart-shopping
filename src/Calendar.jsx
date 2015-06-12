@@ -3,26 +3,29 @@ var Eventful = require('eventful-react');
 var CalendarComponent = require('react-widgets').Calendar
 
 
+
 var DayComponent = Eventful.createClass({
- render: function() {
-   var day = this.props.label;
-   var idString = '';
-   var dates = [4, 6, 9, 11, 21];
+  render: function() {
+    var dateClicked = window.dateClicked;
+    var curDate = dateClicked.slice(0, dateClicked.indexOf('/')) + '/' + this.props.label + '/' + dateClicked.slice(-2);
+    var events = window.events;
+    var idString = '';
 
-   if (dates.indexOf(parseInt(day)) > -1) {
-     idString += 'event';
-   };
+    if (events[curDate]) {
+      idString += 'event';
+    };
 
-   return (<div id={idString} >
-       {this.props.label}
-     </div>);
- }
+    return (
+      <div id={idString} >
+        {this.props.label}
+      </div>);
+    }
 });
 
 var Calendar = Eventful.createClass({
+
   getInitialState : function() {
     return {
-
     };
   },
   handleChange: function(dateInstance) {
@@ -30,10 +33,17 @@ var Calendar = Eventful.createClass({
       dateInstance: dateInstance
     });
   },
+
   render: function() {
+    var props = {
+      events: this.props.events,
+      dayComponent: DayComponent,
+      defaultValue: new Date(),
+      onChange: this.handleChange
+    }
     return (
       <div>
-        <CalendarComponent dayComponent={DayComponent} defaultValue={new Date()} onChange={this.handleChange} />
+        <CalendarComponent {...props} />
         {this.props.dateClicked}
       </div>
     )
@@ -41,3 +51,4 @@ var Calendar = Eventful.createClass({
 })
 
 module.exports = Calendar;
+  
