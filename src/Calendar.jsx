@@ -3,26 +3,47 @@ var Eventful = require('eventful-react');
 var CalendarComponent = require('react-widgets').Calendar
 
 
+
 var DayComponent = Eventful.createClass({
- render: function() {
-   var day = this.props.label;
-   var idString = '';
-   var dates = [4, 6, 9, 11, 21];
+  render: function() {
+    var dateClicked = window.dateClicked;
 
-   if (dates.indexOf(parseInt(day)) > -1) {
-     idString += 'event';
-   };
+    var currentMonth = function() {
+      var monthNoZero = parseInt(dateClicked.slice(0, dateClicked.indexOf('/')));
+      var monthString;
+      if (monthNoZero < 10) {
+        monthString = '0' + monthNoZero.toString();
+      } else {
+        monthString = monthNoZero.toString();
+      };
+      return monthString;
+    };
+    var currentYear = dateClicked.slice(-4);
+    var currentDay = this.props.label;
 
-   return (<div id={idString} >
-       {this.props.label}
-     </div>);
- }
+    var dayRendering = currentMonth() + '-' + currentDay + '-' + currentYear;
+
+    var events = window.events;
+
+    console.log('in dayComponent, dayRendering: ', dayRendering);
+    console.log('in dayComponent, events: ', events);
+    var idString = '';
+
+    if (events[dayRendering]) {
+      idString += 'event';
+    };
+
+    return (
+      <div id={idString} >
+        {this.props.label}
+      </div>);
+    }
 });
 
 var Calendar = Eventful.createClass({
+
   getInitialState : function() {
     return {
-
     };
   },
   handleChange: function(dateInstance) {
@@ -30,10 +51,16 @@ var Calendar = Eventful.createClass({
       dateInstance: dateInstance
     });
   },
+
   render: function() {
+    var props = {
+      dayComponent: DayComponent,
+      defaultValue: new Date(),
+      onChange: this.handleChange
+    }
     return (
       <div>
-        <CalendarComponent dayComponent={DayComponent} defaultValue={new Date()} onChange={this.handleChange} />
+        <CalendarComponent {...props} />
         {this.props.dateClicked}
       </div>
     )
@@ -41,3 +68,4 @@ var Calendar = Eventful.createClass({
 })
 
 module.exports = Calendar;
+  

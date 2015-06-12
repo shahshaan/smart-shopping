@@ -22,6 +22,7 @@ var Home = Eventful.createClass({
   },
 
   render: function() {
+    console.log('XXXX in home.jsx');
     var display;
     if (this.props.data.mode === ModeToggle.CALENDAR) {
       display = <Tracker />

@@ -3,14 +3,12 @@ var Eventful = require('eventful-react');
 var CalendarComponent = require('react-widgets').Calendar
 var Calendar = require('./Calendar.jsx');
 
-
 var Tracker = Eventful.createClass({
   mixins: [ReactFireMixin],
 
   getInitialState: function() {
     var todaysDateInstance = new Date();
     var todaysDate = (todaysDateInstance.getMonth() + 1).toString() + '/' + todaysDateInstance.getDate().toString() + '/' + todaysDateInstance.getFullYear().toString();
-
     // firebase/groupme
     var groupMeGroupId = window.GROUP_ME_GROUP_ID_BE_ACTIVE;
     var firebaseUrl = window.FIREBASE_DB_ROOT + '/groupme-id-' + groupMeGroupId;
@@ -26,11 +24,13 @@ var Tracker = Eventful.createClass({
       groupMeApiUrl: groupMeApiUrl,
       groupMeMessagesApiUrl: groupMeMessagesApiUrl,
       groupMeToken: window.GROUP_ME_TOKEN_SHAAN,
-      firebaseUrl: firebaseUrl
+      firebaseUrl: firebaseUrl,
+      events: {},
+      dateClicked: todaysDate
     };
   },
   componentDidMount: function() {
-
+    console.log('componentDidMount ran');
     var ref = new Firebase(this.state.firebaseUrl + '/events');
     this.bindAsObject(ref, "events");
 
@@ -261,3 +261,5 @@ var Tracker = Eventful.createClass({
 });
 
 module.exports = Tracker;
+
+
