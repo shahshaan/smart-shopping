@@ -55,6 +55,14 @@ var ListItem = Eventful.createClass({
       cssClasses.editingIcon += 'show';
       cssClasses.shoppingIcon += 'hide';
     }
+    if (this.props.sales) {
+      var salesDivs = [
+        <div className="sales market-name">{this.props.sales.market}</div>,
+        <div className="sales sale-price">{this.props.sales.salePrice}</div>,
+        <div className="sales reg-price">{this.props.sales.regPrice}</div>,
+        <div className="sales sale-dates">{this.props.sales.saleDates}</div>
+      ]
+    }
 
     return (
       <li className="list-item animated fadeInDown">
@@ -63,6 +71,7 @@ var ListItem = Eventful.createClass({
           <i className ={cssClasses.editingIcon} onClick={this.removeItem}></i>
           <div className="item-label" onClick={this.switchToEditable}>{this.props.name}</div>
           <div className="food-cat">{this.props.foodCategory}</div>
+          {salesDivs}
         </div>
         <div className={cssClasses.editableItem}>
           <form name={"item-form-" + this.props.index} onSubmit={this.updateItem}>
