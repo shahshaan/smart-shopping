@@ -35,21 +35,55 @@ var Tracker = Eventful.createClass({
         dateClicked: dateClicked
       })
     });
-    this.isNewestMessageIdInFirebase();
+
+    var addNewestMessagesFromGroupMeToFirebase = this.addNewestMessagesFromGroupMeToFirebase;
+    var setFirstMessageIdAsFirstGroupMeMessageId = this.setFirstMessageIdAsFirstGroupMeMessageId;
+    this.isNewestMessageIdInFirebase(function(isNewestMessageIdInFirebase) {
+      if (isNewestMessageIdInFirebase) {
+        addNewestMessagesFromGroupMeToFirebase();
+      } else {
+        setFirstMessageIdAsFirstGroupMeMessageId();
+      };
+    });
+
   },
 
-  isNewestMessageIdInFirebase: function() {
-    var addMessagesFromGroupMeToFirebase = this.addMessagesFromGroupMeToFirebase;
+  addWorkout: function(message) {
+    var firebaseRef = this.state.firebaseRef
+    var timeStamp = parseInt(message.created_at);
+    var day = moment.unix(timeStamp).utc().format('L').split('/').join('-');
+    console.log('date: ', day);
+    console.log('workout to be added, ', message.text);
+    var firebaseWorkoutDay = firebaseRef.child("workouts").child(day);
+    firebaseWorkoutDay.push(message);
+  },
+
+  isWorkout: function(messageText) {
+    var loggingTypes = this.state.groupMeEventHashtags;
+    var hasLogger = false;
+    if (messageText) {
+      for (var i = 0; i < loggingTypes.length; i++) {
+        var logType = loggingTypes[i];
+        if (messageText.indexOf(logType) > -1) {
+          hasLogger = true;
+          break;
+        };
+      };
+    };
+    return hasLogger;
+  },
+
+  isNewestMessageIdInFirebase: function(callback) {
+    var addNewestMessagesFromGroupMeToFirebase = this.addNewestMessagesFromGroupMeToFirebase;
     var setFirstMessageIdAsFirstGroupMeMessageId = this.setFirstMessageIdAsFirstGroupMeMessageId;
 
     this.state.firebaseRef.child('newest_message_id').once("value", 
       function(snapshot) {
         var newest_message_id = snapshot.val();
-        console.log('newest_message_id: ', newest_message_id)
         if (newest_message_id) {
-          addMessagesFromGroupMeToFirebase();
+          callback(true);
         } else {
-          setFirstMessageIdAsFirstGroupMeMessageId();
+          callback(false);
         };
       }, 
       function (errorObject) {
@@ -58,17 +92,75 @@ var Tracker = Eventful.createClass({
     );
   },
 
-  addMessagesFromGroupMeToFirebase: function() {
-    console.log('going to addMessagesFromGroupMeToFirebase here');
+  addNewestMessagesFromGroupMeToFirebase: function() {
+    var groupMeToken = this.state.groupMeToken;
+    var firebaseRef = this.state.firebaseRef;
+    var groupMeMessagesApiUrl = this.state.groupMeMessagesApiUrl;
+    var isWorkout = this.isWorkout;
+    var addWorkout = this.addWorkout;
+    var addNewestMessagesFromGroupMeToFirebase = this.addNewestMessagesFromGroupMeToFirebase;
+
+    getNewestMessageIdFromFirebase = function(callback, callback2) { // 3
+
+      firebaseRef.child('newest_message_id').once("value", 
+        function(snapshot) {
+          var newest_message_id = snapshot.val();
+          callback(newest_message_id, callback2);
+        }, 
+        function (errorObject) {
+          console.log("The read failed: " + errorObject.code);
+        }
+      );
+    };
+
+    getNewestMessagesFromGroupMe = function(afterId, callback) { // 1
+
+      $.ajax({
+          url: groupMeMessagesApiUrl,
+          type:'get',
+          data: {
+            after_id: afterId,
+            limit: 100,
+            token: groupMeToken
+          },
+          success: function(response) {
+            var messages = response.response.messages;
+            callback(messages);
+          },
+          error: function(xhr) {
+            console.log('Error in initial call for messages in setFirstMessageIdAsFirstGroupMeMessageId: ', xhr);
+          }
+      });
+    };
+
+    addMessagesGrabbedToFirebase = function(messages) {
+
+      if (messages.length > 0) {
+        var firebaseMessages = firebaseRef.child("messages");
+        var messagesLength = messages.length;
+        for (var i = 0; i < messagesLength; i++) {
+          var message = messages[i];
+          firebaseMessages.push(message);
+          if (message.text && isWorkout(message.text)) {
+            addWorkout(message);
+          };
+          if (i === (messagesLength - 1)) {
+            var firebaseNewestMessageId = firebaseRef.child("newest_message_id");
+            firebaseNewestMessageId.set(messages[messages.length - 1].id, function() { // set latest message id
+              addNewestMessagesFromGroupMeToFirebase();
+            });
+          };
+        };
+      } 
+    };
+
+    getNewestMessageIdFromFirebase(function(afterId) {
+      getNewestMessagesFromGroupMe(afterId, addMessagesGrabbedToFirebase);
+    });
+
   },
 
   setFirstMessageIdAsFirstGroupMeMessageId: function() {
-    console.log('in setFirstMessageIdAsFirstGroupMeMessageId');
-
-    // testing fake message id setting
-    // var firstMessageId = '1234';
-    // firebaseRefNewestMessageId.set(firstMessageId);
-
 
     var firebaseRefNewestMessageId = this.state.firebaseRef.child('newest_message_id');
     var firstMessageId = '';
@@ -104,7 +196,7 @@ var Tracker = Eventful.createClass({
     };
 
     $.ajax({
-        url: this.state.groupMeMessagesApiUrl,
+        url: groupMeMessagesApiUrl,
         type:'get',
         data: {
           limit: 100,
@@ -119,8 +211,6 @@ var Tracker = Eventful.createClass({
           console.log('Error in initial call for messages in setFirstMessageIdAsFirstGroupMeMessageId: ', xhr);
         }
     });
-
-
 
   },
 
