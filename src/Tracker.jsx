@@ -251,7 +251,7 @@ var Tracker = Eventful.createClass({
           <Calendar dateClicked={this.state.dateClicked} />
         </div>
         <div className="col-md-6 single-day">
-          <Day dateClicked={this.state.dateClicked} eventsForDayClicked={this.state.eventsForDayClicked} />
+          <Day dateClicked={this.state.dateClicked} eventsForDayClicked={this.state.eventsForDayClicked} events={this.state.events} />
         </div>
       </div>
     );
